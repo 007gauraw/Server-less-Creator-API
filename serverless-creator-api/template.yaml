@@ -18,8 +18,20 @@ Resources:
 
       Cors:
         AllowMethods: "'OPTIONS, POST, GET'"
-        AllowHeaders: "'Content-Type'"
-        AllowOrigin: "'*'" #DO NOT USE THIS VALUE IN PRODUCTION - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'http://localhost:8080,https://d2n7sxixl95nrg.cloudfront.net'"
+        AllowCredentials: true - https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html
+
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: arn:aws:cognito-idp:ap-south-1:643955788073:userpool/ap-south-1_ZnZ0C8oXd
+            Identity:
+              Header: Authorization
+            # Optionally, you can specify the App Client ID as an audience
+            # Audience:
+            #   - 1v16trkjiq6nbbg8kh9cb5jnpq
 
   # This is a Lambda function config associated with the source code: get-by-id.js
   getAllItemsFunction:
@@ -52,6 +64,8 @@ Resources:
             Method: GET
             RestApiId:
               Ref: ApiGatewayApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
@@ -86,6 +100,8 @@ Resources:
             Method: GET
             RestApiId:
               Ref: ApiGatewayApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
@@ -119,6 +135,8 @@ Resources:
             Method: POST
             RestApiId:
               Ref: ApiGatewayApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
 

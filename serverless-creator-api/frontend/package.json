@@ -10,7 +10,8 @@
     "lint": "vue-cli-service lint",
     "test": "vitest"
   },
-  "dependencies": {    
+  "dependencies": {
+    "oidc-client-ts": "^2.2.2",
     "axios": "^1.6.0",
     "core-js": "^3.18.1",
     "vue": "^3.0.0"

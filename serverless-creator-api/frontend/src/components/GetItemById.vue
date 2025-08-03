@@ -16,7 +16,19 @@
 </template>
 
 <script>
+
 import axios from 'axios'
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+
+const cognitoAuthConfig = {
+  authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_ZnZ0C8oXd",
+  client_id: "1v16trkjiq6nbbg8kh9cb5jnpq",
+  redirect_uri: window.location.origin,
+  response_type: "code",
+  scope: "aws.cognito.signin.user.admin email openid phone",
+  userStore: new WebStorageStateStore({ store: window.localStorage })
+};
+const userManager = new UserManager(cognitoAuthConfig);
 
 export default {
   name: 'GetItemById',  
@@ -33,17 +45,32 @@ export default {
     }
   },
   methods: {
-    getItemsById() {
-      axios
-        .get(process.env.VUE_APP_API_ENDPOINT + this.formData.userId)
-        .then((response) => {
-          console.log(response)
-          this.user = response.data
-        })
-        .catch((error) => {
-          console.log(error)
-          this.errorMsg = 'Error retrieving data'
-        })
+    async getItemsById() {
+      try {
+        const user = await userManager.getUser();
+        
+        // Use access_token instead of id_token for API authorization
+        const token = user && user.access_token ? user.access_token : null;
+        
+        if (!token) {
+          this.errorMsg = 'Not authenticated';
+          return;
+        }
+        const response = await axios.get(
+          process.env.VUE_APP_API_ENDPOINT + this.formData.userId,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+        this.user = response.data;
+        this.errorMsg = '';
+      } catch (error) {
+        console.log(error);
+        this.errorMsg = 'Error retrieving data';
+      }
     },
   },
 }
