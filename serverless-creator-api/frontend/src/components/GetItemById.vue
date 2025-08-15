@@ -21,9 +21,9 @@ import axios from 'axios'
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_ZnZ0C8oXd",
-  client_id: "1v16trkjiq6nbbg8kh9cb5jnpq",
-  redirect_uri: window.location.origin,
+  authority: process.env.VUE_APP_COGNITO_AUTHORITY,
+  client_id: process.env.VUE_APP_COGNITO_CLIENT_ID,
+  redirect_uri:  window.location.origin,
   response_type: "code",
   scope: "aws.cognito.signin.user.admin email openid phone",
   userStore: new WebStorageStateStore({ store: window.localStorage })
@@ -49,10 +49,12 @@ export default {
       try {
         const user = await userManager.getUser();
         
+ 
         // Use access_token instead of id_token for API authorization
         const token = user && user.access_token ? user.access_token : null;
-        
-        if (!token) {
+        console.log(token)
+        const idToken =  user && user.id_token ? user.id_token : null;
+        if (!idToken) {
           this.errorMsg = 'Not authenticated';
           return;
         }
@@ -60,7 +62,7 @@ export default {
           process.env.VUE_APP_API_ENDPOINT + this.formData.userId,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${idToken}`,
               'Content-Type': 'application/json'
             },
           }
